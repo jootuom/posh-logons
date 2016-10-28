@@ -37,7 +37,7 @@
 				<TableHeaders>
 					<TableColumnHeader>
 						<Label>LogonId</Label>
-						<Width>7</Width>
+						<Width>9</Width>
 					</TableColumnHeader>
 					<TableColumnHeader>
 						<Label>StartTime</Label>

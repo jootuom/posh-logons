@@ -4,12 +4,35 @@
 }
 
 Function Get-Logons {
+    <#
+        .SYNOPSIS
+        Get active logons on target computer
+        .DESCRIPTION
+        Get all active logon sessions on target computer. Optionally you can
+        filter to just remote logons or get fully unfiltered output.
+        .PARAMETER ComputerName
+        Target computer
+
+        default: local computer
+
+        .PARAMETER LogonType
+        Filter output to specific logon types:
+
+        Filter			  | Explanation
+        -------------------------------
+        All               | Interactive and RemoteInteractive only
+        Interactive       | Local logons only
+        RemoteInteractive | Remote interactive logons only
+        Unfiltered        | Full unfiltered output
+
+        default: "All"
+    #>
     [CmdletBinding()]
     [OutputType()]
     Param(
         [Parameter(Position=0, ValueFromPipeline=$true)]
         [string] $ComputerName = $env:ComputerName,
-        
+
         [Parameter()]
         [ValidateSet("All", "Interactive", "RemoteInteractive", "Unfiltered")]
         [string] $LogonType = "All"
@@ -32,7 +55,7 @@ Function Get-Logons {
             12 = "CachedRemoteInteractive"
             13 = "CachedUnlock"
         }
-        
+
         switch ($LogonType) {
             "All"               { $typefilter = @(2, 10) }
             "Interactive"       { $typefilter = @(2)     }
@@ -47,7 +70,7 @@ Function Get-Logons {
 
         foreach ($session in ($sessions | where {$_.LogonType -in $typefilter})) {
             $logon = $logons | where {$_.Dependent.LogonId -eq $session.LogonId}
-            
+
             $result = New-Object -TypeName "PSObject" -Property @{
                 "ComputerName" = $ComputerName
                 "LogonId" = $session.LogonId
@@ -61,7 +84,7 @@ Function Get-Logons {
                 "LogonType" = $logontypes[[int]$session.LogonType]
             }
             $result.PSTypeNames.Insert(0, "LogonSession")
-            
+
             $result
         }
     }
